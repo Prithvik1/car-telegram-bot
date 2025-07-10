@@ -8,26 +8,26 @@ from car_ai_agent import (
 import pandas as pd
 import google.generativeai as genai
 
-# Configure Gemini (reuse your API key from environment)
+
 import os
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCmfOTdnJQlRSHK_2tZaDvlfmIekc08T8c"
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-# Logging
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 
-# Load data and train once
+
 df = load_data()
 X, y, encoder, cat_cols, num_cols = preprocess_data(df)
 model, mae = train_model(X, y)
 
-# Store user states
+
 user_states = {}
 
-# Gemini call
+
 def ask_gemini_to_estimate_text(car_details, ml_price):
     gemini_model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""
@@ -48,7 +48,7 @@ Based on this, please respond with only your refined resale price in INR — **j
     response = gemini_model.generate_content(prompt)
     return response.text.strip()
 
-# Telegram commands
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Hello! Type 'I want a car' to begin car selection.")
 
@@ -76,7 +76,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 state["year"] = int(text)
                 state["step"] = "done"
 
-                # Suggest cars
+                
                 regex = map_needs_to_type(state["need"])
                 matches = df[
                     (df["Type"].str.contains(regex, case=False, na=False)) &
@@ -106,7 +106,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 selected_car = matches.loc[index]
                 await update.message.reply_text("🔍 Estimating resale value...")
 
-                # Predict ML resale value
+                
                 input_data = selected_car.drop("Ex-Showroom-Price")
                 input_df = pd.DataFrame([input_data])
 
@@ -116,7 +116,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 ml_price = model.predict(user_final_df)[0]
 
-                # Gemini refined estimate
+                
                 resale_price = ask_gemini_to_estimate_text(selected_car, ml_price)
 
                 await update.message.reply_text(
@@ -128,7 +128,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("💬 Type 'I want a car' to begin the process.")
 
-# Run the bot
+
 if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
