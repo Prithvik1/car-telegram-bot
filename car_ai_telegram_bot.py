@@ -12,12 +12,17 @@ from car_ai_agent import (
     map_needs_to_type
 )
 
+
 # Load environment
 from dotenv import load_dotenv
 load_dotenv()
 os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+
+
+
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 logging.basicConfig(level=logging.INFO)
+
 
 # Load and train model
 df = load_data()
@@ -26,6 +31,9 @@ model, mae = train_model(X, y)
 user_states = {}
 
 # Gemini refinement
+
+
+
 def ask_gemini_to_estimate_text(car_details, ml_price):
     gemini_model = genai.GenerativeModel("gemini-2.5-flash")
     prompt = f"""
@@ -47,7 +55,7 @@ Based on this, please respond with only your refined resale price in INR — jus
     return response.text.strip()
 
 
-# /start
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Hello! Type 'I want a car' to begin.")
 
@@ -57,6 +65,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text.strip().lower() == "i want a car":
         user_id = update.effective_user.id
         user_states[user_id] = {"step": "need"}
+
         keyboard = [
             [InlineKeyboardButton("Family", callback_data="need:family")],
             [InlineKeyboardButton("Sporty", callback_data="need:sporty")],
@@ -68,6 +77,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🚘 What type of car are you looking for?",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+
     else:
         await update.message.reply_text("💬 Please type 'I want a car' to begin.")
 
@@ -159,7 +169,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         del user_states[user_id]
 
 
-# Run the bot
+
 if __name__ == "__main__":
     app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
     app.add_handler(CommandHandler("start", start))
