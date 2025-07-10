@@ -8,18 +8,18 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import OneHotEncoder
 
-# 🔑 Gemini API Key
+
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCmfOTdnJQlRSHK_2tZaDvlfmIekc08T8c"
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-# Load data
+
 def load_data():
     df = pd.read_csv("car_data.csv")
     df.columns = df.columns.str.strip()
     df["Ex-Showroom-Price"] = df["Ex-Showroom-Price"].replace('[₹,]', '', regex=True).astype(int)
     return df
 
-# Preprocess
+
 def preprocess_data(df):
     y = df["Ex-Showroom-Price"]
     X = df.drop("Ex-Showroom-Price", axis=1)
@@ -31,7 +31,7 @@ def preprocess_data(df):
     X_final = pd.concat([X_cat_df, X[num_cols].reset_index(drop=True)], axis=1)
     return X_final, y, encoder, cat_cols, num_cols
 
-# Train ML model
+
 def train_model(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     model = RandomForestRegressor(n_estimators=100, random_state=42)
@@ -40,7 +40,7 @@ def train_model(X, y):
     mae = mean_absolute_error(y_test, y_pred)
     return model, mae
 
-# Convert needs to car type
+
 def map_needs_to_type(need):
     need = need.lower()
     if "family" in need or "kids" in need:
@@ -56,7 +56,7 @@ def map_needs_to_type(need):
     else:
         return "Sedan|SUV|Hatchback|MPV"
 
-# Suggest cars
+
 def suggest_cars(df):
     print("\n🧠 Let’s understand your needs...\n")
 
@@ -87,7 +87,7 @@ def suggest_cars(df):
 
     return matches.loc[selected_index]
 
-# Ask Gemini to estimate resale value
+
 def ask_gemini_to_estimate(car_details, ml_price):
     model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""
@@ -110,7 +110,7 @@ Based on this, please respond with only your refined resale price in INR — **j
     print("\n🤖 Gemini says:\n")
     print(response.text)
 
-# Predict resale
+
 def predict_selected_car(model, encoder, car, cat_cols, num_cols):
     input_data = car.drop("Ex-Showroom-Price")
     input_df = pd.DataFrame([input_data])
@@ -122,7 +122,6 @@ def predict_selected_car(model, encoder, car, cat_cols, num_cols):
     prediction = model.predict(user_final_df)[0]
     ask_gemini_to_estimate(car, prediction)
 
-# Run the app
 if __name__ == "__main__":
     print("📥 Loading data and training model...")
     df = load_data()
