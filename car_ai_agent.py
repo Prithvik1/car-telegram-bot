@@ -60,7 +60,7 @@ def map_needs_to_type(need):
 def suggest_cars(df):
     print("\n🧠 Let’s understand your needs...\n")
 
-    car_need = input("🚘 What type of car are you looking for? (e.g., family, sporty, budget, off-road, luxury): ").strip()
+    car_need = input("🚘 What type of car are you looking for?").strip()
     fuel_type = input("⛽ Preferred fuel type? (Petrol, Diesel, Hybrid, Electric): ").strip().capitalize()
     year = int(input("📅 Minimum year of manufacture you want (e.g., 2020): ").strip())
 
@@ -89,7 +89,7 @@ def suggest_cars(df):
 
 
 def ask_gemini_to_estimate(car_details, ml_price):
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
     prompt = f"""
 You are a car pricing expert.
 
